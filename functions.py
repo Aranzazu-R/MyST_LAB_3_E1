@@ -1,24 +1,26 @@
 """
 # -- --------------------------------------------------------------------------------------------------- -- #
-# -- project: Laboratorio 1. Inversión Pasiva y Activa                                                   -- #
+# -- project: Laboratorio 3. Behavioral Finance                                                  -- #
 # -- script: functions.py : python script with general functions                                         -- #
 # -- author: FridaHernandezL                                                                             -- #
 # -- license: GPL-3.0 License                                                                            -- #
-# -- repository: https://github.com/FridaHernandezL/Laboratorio1_MyST                                    -- #
+# -- repository: https://github.com/FridaHernandezL/MyST_LAB_3_E1                                    -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
 import pandas as pd
 import numpy as np 
 
+# 1.0 Estadistica descriptiva
+
 def f_leer_archivo(path,sheet):
     return pd.read_excel(path,sheet)
 
 
-def f_columnas_tiempos(data,col1,col2):
+def f_columnas_tiempos(data):
     for i in range(len(data)):
-        data[col1]=pd.to_datetime(data.iloc[i,0])
-        data[col2]=pd.to_datetime(data.iloc[i,8])
-        data['Time_change']=mtf[col1]-mtf[col2]
+        data.iloc[i,0]=pd.to_datetime(data.iloc[i,0])
+        data.iloc[i,8]=pd.to_datetime(data.iloc[i,8])
+        data.loc[i,'Time_change']=data.iloc[i,8]-data.iloc[i,0]
     return data
 
 
@@ -75,3 +77,23 @@ def f_estadisticas_ba(data,datapip,df):
     
     diccionario={'tabla':df_1,'ranking':df_2_ranking}
     return diccionario[df]
+
+
+
+# 2.0 Metricas de atribucion al desempeño
+
+def f_evolucion_capital(data):
+    dates=[]
+    for i in range(len(data)):
+        data.iloc[i,0]=data.iloc[i,0].strftime('%Y-%m-%d')
+        dates.append(data.iloc[i,0])
+    dates=list(set(dates))
+    dates.sort()
+    dateslist=pd.date_range(dates[0],dates[-1],freq='d').strftime('%Y-%m-%d')
+    evcap=pd.DataFrame({'timestamp':dateslist})
+    for i in range(len(dateslist)):
+        evcap.loc[i,'profit_d']=mtf[mtf['Time']==dateslist[i]]['Profit'].sum()
+    evcap.loc[0,'profit_acm_d']=k+evcap.loc[0,'profit_d']
+    for i in range(len(dateslist)-1):
+        evcap.loc[i+1,'profit_acm_d']=evcap.loc[i,'profit_acm_d']+evcap.loc[i+1,'profit_d']
+    return evcap
