@@ -26,12 +26,15 @@ def f_columnas_tiempos(data):
 
 def f_pip_size(ticker):
     diccionario={'EURUSD':0.00001, 'GBPUSD':0.00001,'EURGBP':0.00001,'USDCAD':0.00001,'USDCHF':0.00001,
-                 'GBPJPY':0.001,'USDJPY':0.001,'EURCAD':0.001}
+                 'GBPJPY':0.001,'USDJPY':0.001,'EURCAD':0.001,'USDCNH':0.00001,'GBPNZD':0.00001,'AUDUSD':0.00001,
+                'USDMXN':0.00001,'CADCHF':0.00001,'CADJPY':0.001,'USDNOK':0.00001,'USDSGD':0.00001,'USDPLN':0.00001,
+                'USDTRY':0.00001,'EURJPY':0.001,'EURMXN':0.00001,'NZDUSD':0.00001,'GBPCHF':0.00001,'AUDCHF':0.00001,
+                'GBPAUD':0.00001}
     return (round(1/diccionario[ticker]))
 
 
 def f_columnas_pips(data):
-    pip = pd.DataFrame(0, index=range(len(mtf)),columns=['pips'])
+    pip = pd.DataFrame(0, index=range(len(data)),columns=['pips'])
     pip['instrument']=data['Symbol']
     for i in range(len(data)):
         if data.loc[i,'Type']=='sell':
@@ -56,11 +59,11 @@ def f_estadisticas_ba(data,datapip,df):
                                  'Ganadoras ventas/ Operaciones totales']})
     df_1.iloc[0,1]=len(data)
     df_1.iloc[1,1]=len(data[data['Profit']>0])
-    df_1.iloc[2,1]=len(mtf[(mtf['Profit']>0) & (mtf['Type']=='buy')])
-    df_1.iloc[3,1]=len(mtf[(mtf['Profit']>0) & (mtf['Type']=='sell')])
+    df_1.iloc[2,1]=len(data[(data['Profit']>0) & (data['Type']=='buy')])
+    df_1.iloc[3,1]=len(data[(data['Profit']>0) & (data['Type']=='sell')])
     df_1.iloc[4,1]=len(data[data['Profit']<0])
-    df_1.iloc[5,1]=len(mtf[(mtf['Profit']<0) & (mtf['Type']=='buy')])
-    df_1.iloc[6,1]=len(mtf[(mtf['Profit']<0) & (mtf['Type']=='sell')])
+    df_1.iloc[5,1]=len(data[(data['Profit']<0) & (data['Type']=='buy')])
+    df_1.iloc[6,1]=len(data[(data['Profit']<0) & (data['Type']=='sell')])
     df_1.iloc[7,1]=data['Profit'].median()
     df_1.iloc[8,1]=datapip['pips'].median()
     df_1.iloc[9,1]=df_1.iloc[1,1]/df_1.iloc[0,1]
@@ -69,7 +72,7 @@ def f_estadisticas_ba(data,datapip,df):
     df_1.iloc[10,1]=df_1.iloc[4,1]/df_1.iloc[1,1]
     df_1['valor']=round(df_1['valor'],2)
     
-    uniques=mtf['Symbol'].unique()
+    uniques=data['Symbol'].unique()
     rank=[]
     for i in uniques:
         rank.append(round(len(data[(data['Profit']>0) & (data['Symbol']==i)])/len(data[data['Symbol']==i])*100,2))
@@ -82,6 +85,7 @@ def f_estadisticas_ba(data,datapip,df):
 
 # 2.0 Metricas de atribucion al desempeño
 
+k=100000
 def f_evolucion_capital(data):
     dates=[]
     for i in range(len(data)):
@@ -92,7 +96,7 @@ def f_evolucion_capital(data):
     dateslist=pd.date_range(dates[0],dates[-1],freq='d').strftime('%Y-%m-%d')
     evcap=pd.DataFrame({'timestamp':dateslist})
     for i in range(len(dateslist)):
-        evcap.loc[i,'profit_d']=mtf[mtf['Time']==dateslist[i]]['Profit'].sum()
+        evcap.loc[i,'profit_d']=data[data['Time']==dateslist[i]]['Profit'].sum()
     evcap.loc[0,'profit_acm_d']=k+evcap.loc[0,'profit_d']
     for i in range(len(dateslist)-1):
         evcap.loc[i+1,'profit_acm_d']=evcap.loc[i,'profit_acm_d']+evcap.loc[i+1,'profit_d']
