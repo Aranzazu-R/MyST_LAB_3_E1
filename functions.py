@@ -8,7 +8,14 @@
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
 import pandas as pd
-import numpy as np 
+import numpy as np
+import pandas_datareader.data as web
+import statistics as st
+pd.options.mode.chained_assignment = None  # default='warn'
+import yfinance as yf
+from datetime import datetime, date, timedelta
+import MetaTrader5 as mt5
+import pytz
 
 # 1.0 Estadistica descriptiva
 
@@ -17,33 +24,29 @@ def f_leer_archivo(path,sheet):
 
 
 def f_columnas_tiempos(data):
+    col1=pd.to_datetime(data.iloc[:,0])
+    col2=pd.to_datetime(data.iloc[:,8])
+    data['Time_change']=col2-col1 
     for i in range(len(data)):
-        data.iloc[i,0]=pd.to_datetime(data.iloc[i,0])
-        data.iloc[i,8]=pd.to_datetime(data.iloc[i,8])
-        data.loc[i,'Time_change']=data.iloc[i,8]-data.iloc[i,0]
+        data['Time_change'][i] = data['Time_change'][i].total_seconds() 
     return data
 
 
 def f_pip_size(ticker):
-    diccionario={'EURUSD':0.00001, 'GBPUSD':0.00001,'EURGBP':0.00001,'USDCAD':0.00001,'USDCHF':0.00001,
-                 'GBPJPY':0.001,'USDJPY':0.001,'EURCAD':0.001,'USDCNH':0.00001,'GBPNZD':0.00001,'AUDUSD':0.00001,
-                'USDMXN':0.00001,'CADCHF':0.00001,'CADJPY':0.001,'USDNOK':0.00001,'USDSGD':0.00001,'USDPLN':0.00001,
-                'USDTRY':0.00001,'EURJPY':0.001,'EURMXN':0.00001,'NZDUSD':0.00001,'GBPCHF':0.00001,'AUDCHF':0.00001,
-                'GBPAUD':0.00001}
-    return (round(1/diccionario[ticker]))
+    size=pd.read_csv('instruments_pips.csv')
+    pip=size[size['Instrument']==ticker]['TickSize']
+    return (int(1/pip))
 
 
 def f_columnas_pips(data):
-    pip = pd.DataFrame(0, index=range(len(data)),columns=['pips'])
-    pip['instrument']=data['Symbol']
     for i in range(len(data)):
         if data.loc[i,'Type']=='sell':
-            pip.loc[i,'pips']=(data.iloc[i,5]-data.iloc[i,9])*f_pip_size(pip.loc[i,'instrument'])
+            data.loc[i,'pips']=(data.iloc[i,5]-data.iloc[i,9])*f_pip_size(data.loc[i,'Symbol'])
         else:
-            pip.loc[i,'pips']=(data.iloc[i,9]-data.iloc[i,5])*f_pip_size(pip.loc[i,'instrument'])
-    pip['pips_acm']=pip['pips'].cumsum()
-    pip['profit_acm']=data['Profit'].astype(float).cumsum()
-    return pip
+            data.loc[i,'pips']=(data.iloc[i,9]-data.iloc[i,5])*f_pip_size(data.loc[i,'Symbol'])
+    data['pips_acm']=data['pips'].cumsum()
+    data['profit_acm']=data['Profit'].astype(float).cumsum()
+    return data
 
 
 def f_estadisticas_ba(data,datapip,df):
@@ -83,21 +86,55 @@ def f_estadisticas_ba(data,datapip,df):
 
 
 
-# 2.0 Metricas de atribucion al desempeño
+#%% 2.0 Metricas de atribucion al desempeño
 
-k=100000
 def f_evolucion_capital(data):
-    dates=[]
-    for i in range(len(data)):
-        data.iloc[i,0]=data.iloc[i,0].strftime('%Y-%m-%d')
-        dates.append(data.iloc[i,0])
-    dates=list(set(dates))
-    dates.sort()
-    dateslist=pd.date_range(dates[0],dates[-1],freq='d').strftime('%Y-%m-%d')
-    evcap=pd.DataFrame({'timestamp':dateslist})
-    for i in range(len(dateslist)):
-        evcap.loc[i,'profit_d']=data[data['Time']==dateslist[i]]['Profit'].sum()
-    evcap.loc[0,'profit_acm_d']=k+evcap.loc[0,'profit_d']
-    for i in range(len(dateslist)-1):
-        evcap.loc[i+1,'profit_acm_d']=evcap.loc[i,'profit_acm_d']+evcap.loc[i+1,'profit_d']
-    return evcap
+    prof = data[["Time","Profit"]]
+    prof['timestamp'] = pd.to_datetime(data["Time"])
+    prof.set_index('timestamp',inplace=True)
+    prof = prof.resample("D").sum()
+    prof['profit_acm_d'] = 100000 + prof['Profit'].astype(float).cumsum()
+    prof=prof.reset_index()
+    prof=prof[(prof['timestamp']!='2022-09-24')&(prof['timestamp']!='2022-09-25')]
+    return prof
+
+def get_adj_closes(tickers, start_date=None, end_date=None):
+    # Descargamos DataFrame con todos los datos
+    closes = yf.download(tickers, start_date, end_date)
+    # Solo necesitamos los precios ajustados en el cierre
+    closes = closes['Adj Close']
+    # Se ordenan los índices de manera ascendente
+    closes.sort_index(inplace=True)
+    return closes
+
+def f_estadisticas_mad(data,benchmark):
+        #Sharpe Ratio Original:
+        rp = np.mean(np.log(data['profit_acm_d'] / data['profit_acm_d'].shift()).dropna())
+        sdp = np.log(data['profit_acm_d'] / data['profit_acm_d'].shift()).dropna().std()
+        rf = 0.05/365
+        sharp_o = (rp - rf) / sdp
+        #Sharpe Ratio Actualizado:
+        r_trader = np.log(data['profit_acm_d'] / data['profit_acm_d'].shift()).dropna()
+        r_benchmark = np.log(benchmark / benchmark.shift()).dropna()
+        rtr = r_trader.tolist()
+        rbm = r_benchmark.tolist()
+        product = list(map(lambda x,y: x-y ,rtr,rbm))
+        sdp2 = st.pstdev(product) 
+        sharp_a = (np.mean(r_trader) - np.mean(r_benchmark)) / sdp2
+        #DrawDown (Capital):
+        draw_down = data['profit_acm_d'].min()
+        min_max = data['profit_acm_d'].idxmin()
+        fecha_min = data['timestamp'][min_max]
+        #DrawUp (Capital):
+        draw_up = data['profit_acm_d'].max()
+        plus_max = data['profit_acm_d'].idxmax()
+        fecha_max = data['timestamp'][plus_max]
+        est_mad=pd.DataFrame({'metrica':['sharpe_original','sharpe_actualizado','drawdown_capi','drawdown_capi',
+                                         'drawdown_capi','drawup_capi','drawup_capi','drawup_capi'],
+                             'valor':[sharp_o, sharp_a, fecha_min, fecha_max ,draw_down, fecha_min, fecha_max ,draw_up],
+                             'descripcion':['Sharpe Ratio Fórmula Original','Sharpe Ratio Fórmula Ajustada',
+                                            'Fecha inicial del DrawDown de Capital', 'Fecha final del DrawDown de Capital',
+                                            'Máxima pérdida flotante registrada', 'Fecha inicial del DrawUp de Capital', 
+                                            'Fecha final del DrawUp de Capital','Máxima ganancia flotante registrada']})
+        return est_mad
+
