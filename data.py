@@ -9,9 +9,16 @@
 """
 import pandas as pd
 import numpy as np
+import pandas_datareader.data as web
+import statistics as st
+pd.options.mode.chained_assignment = None  # default='warn'
+import yfinance as yf
+from datetime import datetime, date, timedelta
+import MetaTrader5 as mt5
+import pytz
 import functions as fn
 
-# Estadistica descriptiva
+k=100000
 
 ## Importacion de datos
 mtf=fn.f_leer_archivo('MyST_LAB2_FMHL.xlsx','Historico MT5')
@@ -19,34 +26,18 @@ mtm=fn.f_leer_archivo('MyST_LAB2_MMM.xlsx','Historico MT5')
 mtp=fn.f_leer_archivo('MyST_LAB2_PHMC.xlsx','Historico MT5')
 mta=fn.f_leer_archivo('MyST_LAB2_ARG.xlsx','Historico MT5')
 
+#data for import closes
+end_f=pd.to_datetime(mtf.iloc[-1,0])+timedelta(days=1)
+end_m=pd.to_datetime(mtm.iloc[-1,0])+timedelta(days=1)
+end_p=pd.to_datetime(mtp.iloc[-1,0])+timedelta(days=1)
+end_a=pd.to_datetime(mta.iloc[-1,0])+timedelta(days=1)
 
-## time change
-tcf=fn.f_columnas_tiempos(mtf)
-tcm=fn.f_columnas_tiempos(mtm)
-tcp=fn.f_columnas_tiempos(mtp)
-tca=fn.f_columnas_tiempos(mta)
+#fn.f_be_de(mtf).to_csv(r"rates_f.csv")
+#fn.f_be_de(mtm).to_csv(r"rates_m.csv")
+#fn.f_be_de(mtp).to_csv(r"rates_p.csv")
+#fn.f_be_de(mta).to_csv(r"rates_a.csv")
 
-## pips
-pf=fn.f_columnas_pips(mtf)
-pm=fn.f_columnas_pips(mtm)
-pp=fn.f_columnas_pips(mtp)
-pa=fn.f_columnas_pips(mta)
-
-## estadisticas_tabla
-e_bat_f=fn.f_estadisticas_ba(mtf,f_columnas_pips(mtf),'tabla')
-e_bat_m=fn.f_estadisticas_ba(mtm,f_columnas_pips(mtm),'tabla')
-e_bat_p=fn.f_estadisticas_ba(mtp,f_columnas_pips(mtp),'tabla')
-e_bat_a=fn.f_estadisticas_ba(mta,f_columnas_pips(mta),'tabla')
-
-## estadisticas_ranking
-e_bar_f=fn.f_estadisticas_ba(mtf,f_columnas_pips(mtf),'ranking').head()
-e_bar_m=fn.f_estadisticas_ba(mtm,f_columnas_pips(mtm),'ranking').head()
-e_bar_p=fn.f_estadisticas_ba(mtp,f_columnas_pips(mtp),'ranking').head()
-e_bar_a=fn.f_estadisticas_ba(mta,f_columnas_pips(mta),'ranking').head()
-
-
-# Metricas de Atribucion al desempeño
-evcap_f=fn.f_evolucion_capital(mtf)
-evcap_m=fn.f_evolucion_capital(mtm)
-evcap_p=fn.f_evolucion_capital(mtp)
-evcap_a=fn.f_evolucion_capital(mta)
+rates_f=pd.read_csv('rates_f.csv')
+rates_m=pd.read_csv('rates_m.csv')
+rates_p=pd.read_csv('rates_p.csv')
+rates_a=pd.read_csv('rates_a.csv')
