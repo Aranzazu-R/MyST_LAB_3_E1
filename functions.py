@@ -138,3 +138,46 @@ def f_estadisticas_mad(data,benchmark):
                                             'Fecha final del DrawUp de Capital','Máxima ganancia flotante registrada']})
         return est_mad
 
+#%% 3.0 Behavioral Finance
+
+def f_be_de(data):
+    year1=int(data['Time'].min()[0:4])
+    year2=int(data['Time'].max()[0:4])
+    
+    month1=int(data['Time'].min()[6])
+    month2=int(data['Time'].max()[6])
+    
+    day1=int(data['Time'].min()[8:10])
+    day2=int(data['Time'].max()[8:10])
+    # import the 'pandas' module for displaying data obtained in the tabular form
+    import pandas as pd
+    pd.set_option('display.max_columns', 500) # number of columns to be displayed
+    pd.set_option('display.width', 1500)      # max table width to display
+
+    # establish connection to MetaTrader 5 terminal
+    if not mt5.initialize():
+        print("initialize() failed, error code =",mt5.last_error())
+        quit()
+
+    # set time zone to UTC
+    timezone = pytz.timezone("Etc/UTC")
+    # create 'datetime' objects in UTC time zone to avoid the implementation of a local time zone offset
+    utc_from = datetime(year1,month1,day1, tzinfo=timezone)
+    utc_to = datetime(year2,month2,day2, hour = 23, tzinfo=timezone)
+    # get bars from USDJPY M5 within the interval of 2020.01.10 00:00 - 2020.01.11 13:00 in UTC time zone
+    symbols=data['Symbol'].unique()
+    rate_df=[]
+    for symbol in symbols:
+        rates= pd.DataFrame(mt5.copy_rates_range(symbol, mt5.TIMEFRAME_M5, utc_from, utc_to))
+        rates['Symbol']=symbol
+        rate_df.append(rates)
+    rates = pd.concat(rate_df)
+
+    # shut down connection to the MetaTrader 5 terminal
+    mt5.shutdown()
+    
+    # convert time in seconds into the 'datetime' format
+    rates['time']=pd.to_datetime(rates['time'], unit='s')
+
+    # display data
+    return rates
