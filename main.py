@@ -27,19 +27,20 @@ pp=fn.f_columnas_pips(dta.mtp)
 pa=fn.f_columnas_pips(dta.mta)
 
 ## estadisticas_tabla
-e_bat_f=fn.f_estadisticas_ba(dta.mtf,pf,'tabla')
-e_bat_m=fn.f_estadisticas_ba(dta.mtm,pm,'tabla')
-e_bat_p=fn.f_estadisticas_ba(dta.mtp,pp,'tabla')
-e_bat_a=fn.f_estadisticas_ba(dta.mta,pa,'tabla')
+e_bat_f=fn.f_estadisticas_ba(dta.mtf,'tabla')
+e_bat_m=fn.f_estadisticas_ba(dta.mtm,'tabla')
+e_bat_p=fn.f_estadisticas_ba(dta.mtp,'tabla')
+e_bat_a=fn.f_estadisticas_ba(dta.mta,'tabla')
 
 ## estadisticas_ranking
-e_bar_f=fn.f_estadisticas_ba(dta.mtf,pf,'ranking').head()
-e_bar_m=fn.f_estadisticas_ba(dta.mtm,pm,'ranking').head()
-e_bar_p=fn.f_estadisticas_ba(dta.mtp,pp,'ranking').head()
-e_bar_a=fn.f_estadisticas_ba(dta.mta,pa,'ranking').head()
+e_bar_f=fn.f_estadisticas_ba(dta.mtf,'ranking').head()
+e_bar_m=fn.f_estadisticas_ba(dta.mtm,'ranking').head()
+e_bar_p=fn.f_estadisticas_ba(dta.mtp,'ranking').head()
+e_bar_a=fn.f_estadisticas_ba(dta.mta,'ranking').head()
 
 
 # Metricas de Atribucion al desempeño
+k=dta.k
 evcap_f=fn.f_evolucion_capital(dta.mtf)
 evcap_m=fn.f_evolucion_capital(dta.mtm)
 evcap_p=fn.f_evolucion_capital(dta.mtp)
@@ -53,11 +54,29 @@ benchmark_a=fn.get_adj_closes(tickers='SPY',start_date=pd.to_datetime(dta.mta.il
 
 ## estadisticas mad
 
-est_f=fn.f_estadisticas_mad(evcap_f,benchmark_f)
-est_m=fn.f_estadisticas_mad(evcap_m,benchmark_m)
-est_p=fn.f_estadisticas_mad(evcap_p,benchmark_p)
-est_a=fn.f_estadisticas_mad(evcap_a,benchmark_a)
+est_f=fn.f_estadisticas_mad(dta.mtf,benchmark_f)
+est_m=fn.f_estadisticas_mad(dta.mtm,benchmark_m)
+est_p=fn.f_estadisticas_mad(dta.mtp,benchmark_p)
+est_a=fn.f_estadisticas_mad(dta.mta,benchmark_a)
 
 # Behavioral finance
 
 ## rates
+
+
+# Visualizations
+
+## grafica 1
+grafica_1(dta.mtf)
+grafica_1(dta.mtm)
+grafica_1(dta.mtp)
+grafica_1(dta.mta)
+
+
+## grafica 2
+grafica_2(dta.mtf)
+grafica_2(dta.mtm)
+grafica_2(dta.mtp)
+grafica_2(dta.mta)
+
+
