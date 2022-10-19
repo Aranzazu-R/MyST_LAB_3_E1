@@ -16,6 +16,7 @@ from datetime import datetime, date, timedelta
 import MetaTrader5 as mt5
 import pytz
 import plotly.graph_objects as go
+import data as dta
 
 # 1.0 Estadistica descriptiva
 
@@ -33,7 +34,7 @@ def f_columnas_tiempos(data):
 
 
 def f_pip_size(ticker):
-    size=pd.read_csv('instruments_pips.csv')
+    size=pd.read_csv('files/instruments_pips.csv')
     pip=size[size['Instrument']==ticker]['TickSize']
     return (int(1/pip))
 
