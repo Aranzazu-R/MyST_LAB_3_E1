@@ -8,6 +8,8 @@ import MetaTrader5 as mt5
 import pytz
 import plotly.graph_objects as go
 import data as dta
+from functions import f_estadisticas_ba
+import main
 
 
 def grafica_1(data):
