@@ -21,10 +21,10 @@ import functions as fn
 k=100000
 
 ## Importacion de datos
-mtf=fn.f_leer_archivo('MyST_LAB2_FMHL.xlsx','Historico MT5')
-mtm=fn.f_leer_archivo('MyST_LAB2_MMM.xlsx','Historico MT5')
-mtp=fn.f_leer_archivo('MyST_LAB2_PHMC.xlsx','Historico MT5')
-mta=fn.f_leer_archivo('MyST_LAB2_ARG.xlsx','Historico MT5')
+mtf=fn.f_leer_archivo('files/MyST_LAB2_FMHL.xlsx','Historico MT5')
+mtm=fn.f_leer_archivo('files/MyST_LAB2_MMM.xlsx','Historico MT5')
+mtp=fn.f_leer_archivo('files/MyST_LAB2_PHMC.xlsx','Historico MT5')
+mta=fn.f_leer_archivo('files/MyST_LAB2_ARG.xlsx','Historico MT5')
 
 #data for import closes
 end_f=pd.to_datetime(mtf.iloc[-1,0])+timedelta(days=1)
@@ -41,3 +41,6 @@ rates_f=pd.read_csv('rates_f.csv')
 rates_m=pd.read_csv('rates_m.csv')
 rates_p=pd.read_csv('rates_p.csv')
 rates_a=pd.read_csv('rates_a.csv')
+
+data_pips0 = pd.read_csv("files/instruments_pips.csv")
+data_pips = data_pips0.set_index("Instrument")

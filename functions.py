@@ -92,7 +92,7 @@ def f_evolucion_capital(data):
     prof['timestamp'] = pd.to_datetime(data["Time"])
     prof.set_index('timestamp',inplace=True)
     prof = prof.resample("D").sum()
-    prof['profit_acm_d'] = k + prof['Profit'].astype(float).cumsum()
+    prof['profit_acm_d'] = 100000 + prof['Profit'].astype(float).cumsum()
     prof=prof.reset_index()
     prof=prof[(prof['timestamp']!='2022-09-17')&(prof['timestamp']!='2022-09-24')]
     prof=prof.reset_index(drop=True)
