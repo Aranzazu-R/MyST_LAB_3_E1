@@ -16,6 +16,7 @@ from datetime import datetime, date, timedelta
 import MetaTrader5 as mt5
 import pytz
 import plotly.graph_objects as go
+import data as dta
 
 # 1.0 Estadistica descriptiva
 
@@ -33,7 +34,7 @@ def f_columnas_tiempos(data):
 
 
 def f_pip_size(ticker):
-    size=pd.read_csv('instruments_pips.csv')
+    size=pd.read_csv('files/instruments_pips.csv')
     pip=size[size['Instrument']==ticker]['TickSize']
     return (int(1/pip))
 
@@ -92,7 +93,7 @@ def f_evolucion_capital(data):
     prof['timestamp'] = pd.to_datetime(data["Time"])
     prof.set_index('timestamp',inplace=True)
     prof = prof.resample("D").sum()
-    prof['profit_acm_d'] = k + prof['Profit'].astype(float).cumsum()
+    prof['profit_acm_d'] = 100000 + prof['Profit'].astype(float).cumsum()
     prof=prof.reset_index()
     prof=prof[(prof['timestamp']!='2022-09-17')&(prof['timestamp']!='2022-09-24')]
     prof=prof.reset_index(drop=True)
@@ -186,3 +187,38 @@ def f_be_de(data):
 
     # display data
     return rates
+
+
+def disp_effect(data,rates):
+    param_data=data[data['Profit']>0].reset_index(drop=True)
+    idx=param_data.index
+    otidx=[]
+    prices_ancla=[]
+    for i in range(len(idx)):
+        n_param_data=param_data.drop([i]).reset_index(drop=True)
+        for j in range(len(n_param_data)):
+            limit_inf=pd.to_datetime(n_param_data.iloc[[idx[j]]]['Time'])
+            limit_sup=pd.to_datetime(n_param_data.iloc[[idx[j]]]['Time.1'])
+            closetime_ancla=pd.to_datetime(param_data.iloc[[idx[i]]]['Time.1'])
+            if closetime_ancla.values<limit_sup.values and closetime_ancla.values>limit_inf.values:
+                otidx.append(n_param_data.iloc[[idx[j]]])
+                prices_ancla.append(param_data.iloc[[idx[i]]])
+    otidx_n=pd.concat(otidx).drop_duplicates().reset_index(drop=True)
+    prices_ancla_n=pd.concat(prices_ancla).drop_duplicates().reset_index(drop=True)
+    if len(otidx_n)!=0:
+        symbolquotes=[]
+        wanted_time=[]
+        symbols=otidx_n['Symbol'].values
+        vol=otidx_n['Volume'].values
+        pip=[]
+        for i in range(len(prices_ancla_n)):
+            wanted_time.append(rates['time'].where(pd.to_datetime(rates['time']) > pd.to_datetime(prices_ancla_n.loc[i,'Time.1'])).dropna().min())
+            symbolquotes.append(float(rates[(rates['time']==wanted_time[i])&(rates['Symbol']==symbols[i])]['close'].values))
+        for symbol in symbols:
+            pip.append(f_pip_size(symbol))
+        symbolprofit=(otidx_n['Price'].values-symbolquotes)*pip*vol
+        disp_effect=[]
+        for i in range(len(symbolprofit)):
+            if symbolprofit[i]<0:
+                disp_effect.append(symbolprofit[i])
+    return disp_effect
