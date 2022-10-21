@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import functions as fn
 import data as dta
-from visualizations import grafica_1, grafica_2
+import visualizations as vs
 
 # Estadistica descriptiva
 
@@ -71,16 +71,16 @@ de_a=fn.disp_effect(dta.mta,dta.rates_a)
 # Visualizations
 
 ## grafica 1
-grafica_1(dta.mtf)
-grafica_1(dta.mtm)
-grafica_1(dta.mtp)
-grafica_1(dta.mta)
+vs.grafica_1(dta.mtf)
+vs.grafica_1(dta.mtm)
+vs.grafica_1(dta.mtp)
+vs.grafica_1(dta.mta)
 
 
 ## grafica 2
-grafica_2(dta.mtf)
-grafica_2(dta.mtm)
-grafica_2(dta.mtp)
-grafica_2(dta.mta)
+vs.grafica_2(dta.mtf)
+vs.grafica_2(dta.mtm)
+vs.grafica_2(dta.mtp)
+vs.grafica_2(dta.mta)
 
 

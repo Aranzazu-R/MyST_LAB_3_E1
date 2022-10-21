@@ -13,10 +13,9 @@ import statistics as st
 pd.options.mode.chained_assignment = None  # default='warn'
 import yfinance as yf
 from datetime import datetime, date, timedelta
-import MetaTrader5 as mt5
+#import MetaTrader5 as mt5
 import pytz
 import plotly.graph_objects as go
-import data as dta
 
 # 1.0 Estadistica descriptiva
 
@@ -145,7 +144,7 @@ def f_estadisticas_mad(data,benchmark):
         return est_mad
 
 #%% 3.0 Behavioral Finance
-
+'''
 def f_be_de(data):
     year1=int(data['Time'].min()[0:4])
     year2=int(data['Time'].max()[0:4])
@@ -187,7 +186,7 @@ def f_be_de(data):
 
     # display data
     return rates
-
+'''
 
 def disp_effect(data,rates):
     param_data=data[data['Profit']>0].reset_index(drop=True)
