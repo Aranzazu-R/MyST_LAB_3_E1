@@ -63,10 +63,10 @@ est_a=fn.f_estadisticas_mad(dta.mta,benchmark_a)
 # Behavioral finance
 
 ## disp_effect
-de_f=disp_effect(dta.mtf,dta.rates_f)
-de_m=disp_effect(dta.mtm,dta.rates_m)
-de_p=disp_effect(dta.mtp,dta.rates_p)
-de_a=disp_effect(dta.mta,dta.rates_a)
+de_f=fn.disp_effect(dta.mtf,dta.rates_f)
+de_m=fn.disp_effect(dta.mtm,dta.rates_m)
+de_p=fn.disp_effect(dta.mtp,dta.rates_p)
+de_a=fn.disp_effect(dta.mta,dta.rates_a)
 
 # Visualizations
 
