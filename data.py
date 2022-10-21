@@ -8,15 +8,8 @@
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
 import pandas as pd
-import numpy as np
-import pandas_datareader.data as web
-import statistics as st
-pd.options.mode.chained_assignment = None  # default='warn'
-import yfinance as yf
-from datetime import datetime, date, timedelta
-import MetaTrader5 as mt5
-import pytz
 import functions as fn
+from datetime import datetime, date, timedelta
 
 k=100000
 
@@ -25,6 +18,17 @@ mtf=fn.f_leer_archivo('files/MyST_LAB2_FMHL.xlsx','Historico MT5')
 mtm=fn.f_leer_archivo('files/MyST_LAB2_MMM.xlsx','Historico MT5')
 mtp=fn.f_leer_archivo('files/MyST_LAB2_PHMC.xlsx','Historico MT5')
 mta=fn.f_leer_archivo('files/MyST_LAB2_ARG.xlsx','Historico MT5')
+
+## Benchmark
+end_f=pd.to_datetime(mtf.iloc[-1,0])+timedelta(days=1)
+benchmark_f=fn.get_adj_closes(tickers='SPY',start_date=pd.to_datetime(mtf.iloc[0,0]).strftime('%Y-%m-%d'),end_date=end_f.strftime('%Y-%m-%d'))
+end_m=pd.to_datetime(mtm.iloc[-1,0])+timedelta(days=1)
+benchmark_m=fn.get_adj_closes(tickers='SPY',start_date=pd.to_datetime(mtm.iloc[0,0]).strftime('%Y-%m-%d'),end_date=end_m.strftime('%Y-%m-%d'))
+end_p=pd.to_datetime(mtm.iloc[-1,0])+timedelta(days=1)
+benchmark_p=fn.get_adj_closes(tickers='SPY',start_date=pd.to_datetime(mtp.iloc[0,0]).strftime('%Y-%m-%d'),end_date=end_p.strftime('%Y-%m-%d'))
+end_a=pd.to_datetime(mtm.iloc[-1,0])+timedelta(days=1)
+benchmark_a=fn.get_adj_closes(tickers='SPY',start_date=pd.to_datetime(mta.iloc[0,0]).strftime('%Y-%m-%d'),end_date=end_a.strftime('%Y-%m-%d'))
+
 
 #data for import closes
 end_f=pd.to_datetime(mtf.iloc[-1,0])+timedelta(days=1)
