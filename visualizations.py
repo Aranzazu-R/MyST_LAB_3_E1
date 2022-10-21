@@ -1,20 +1,11 @@
-import pandas as pd
 import numpy as np
-import statistics as st
-pd.options.mode.chained_assignment = None  # default='warn'
-import yfinance as yf
-from datetime import datetime, date, timedelta
-import MetaTrader5 as mt5
-import pytz
-import plotly.graph_objects as go
-import data as dta
 import functions as fn
-from functions import f_estadisticas_ba
-import main
+import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 
 
 def grafica_1(data):
-    data=f_estadisticas_ba(data,'ranking')
+    data=fn.f_estadisticas_ba(data,'ranking')
     lista=np.zeros(len(data))
     lista[data['rank %'].idxmax()]=0.2
     fig = go.Figure(data=[go.Pie(labels=data['Symbol'], values=data['rank %'], pull=lista)])
@@ -44,3 +35,11 @@ def grafica_2(data):
     fig.add_trace(go.Scatter(x=du_dates, y=du_prof,
                     mode='lines',name='DrawUp',line=dict(color='green',width=4,dash='dash')))
     return fig.show()
+
+def graph_tab(data:'datos a graficar en gráfica de tablas', ejex:'nombre de el eje x', ejey:'nombre de el eje y', titulo:'titulo de la grafica'):
+    plt.style.use('ggplot')
+    data.plot(kind='bar')
+    plt.xlabel(ejex)
+    plt.ylabel(ejey)
+    plt.title(titulo)
+    return plt.show()
