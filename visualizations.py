@@ -8,6 +8,7 @@ import MetaTrader5 as mt5
 import pytz
 import plotly.graph_objects as go
 import data as dta
+import functions as fn
 from functions import f_estadisticas_ba
 import main
 
@@ -22,7 +23,7 @@ def grafica_1(data):
 
 
 def grafica_2(data):
-    data_profit=f_evolucion_capital(data)
+    data_profit=fn.f_evolucion_capital(data)
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=data_profit['timestamp'], y=data_profit['profit_acm_d'],
                     mode='lines',name='Profit Acum',line=dict(color='black')))
