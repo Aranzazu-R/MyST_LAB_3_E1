@@ -145,15 +145,15 @@ def f_estadisticas_mad(data,benchmark):
 
 #%% 3.0 Behavioral Finance
 '''
-def f_be_de(data):
+def rates(data):
     year1=int(data['Time'].min()[0:4])
-    year2=int(data['Time'].max()[0:4])
+    year2=int(data['Time.1'].max()[0:4])
     
     month1=int(data['Time'].min()[6])
-    month2=int(data['Time'].max()[6])
+    month2=int(data['Time.1'].max()[6])
     
     day1=int(data['Time'].min()[8:10])
-    day2=int(data['Time'].max()[8:10])
+    day2=int(data['Time.1'].max()[8:10])
     # import the 'pandas' module for displaying data obtained in the tabular form
     import pandas as pd
     pd.set_option('display.max_columns', 500) # number of columns to be displayed
@@ -188,22 +188,21 @@ def f_be_de(data):
     return rates
 '''
 
-def disp_effect(data,rates):
-    param_data=data[data['Profit']>0].reset_index(drop=True)
-    idx=param_data.index
+def f_be_de(data,rates,dic):
+    ancla=data[data['Profit']>0].reset_index(drop=True)
     otidx=[]
     prices_ancla=[]
-    for i in range(len(idx)):
-        n_param_data=param_data.drop([i]).reset_index(drop=True)
-        for j in range(len(n_param_data)):
-            limit_inf=pd.to_datetime(n_param_data.iloc[[idx[j]]]['Time'])
-            limit_sup=pd.to_datetime(n_param_data.iloc[[idx[j]]]['Time.1'])
-            closetime_ancla=pd.to_datetime(param_data.iloc[[idx[i]]]['Time.1'])
+    for i in range(len(ancla)):
+        n_ancla=ancla.loc[[i]]
+        for j in range(len(data)):
+            limit_inf=pd.to_datetime(data.iloc[[j]]['Time'])
+            limit_sup=pd.to_datetime(data.iloc[[j]]['Time.1'])
+            closetime_ancla=pd.to_datetime(n_ancla['Time.1'])
             if closetime_ancla.values<limit_sup.values and closetime_ancla.values>limit_inf.values:
-                otidx.append(n_param_data.iloc[[idx[j]]])
-                prices_ancla.append(param_data.iloc[[idx[i]]])
-    otidx_n=pd.concat(otidx).drop_duplicates().reset_index(drop=True)
-    prices_ancla_n=pd.concat(prices_ancla).drop_duplicates().reset_index(drop=True)
+                otidx.append(data.iloc[[j]])
+                prices_ancla.append(n_ancla.loc[[i]])
+    otidx_n=pd.concat(otidx).reset_index(drop=True)
+    prices_ancla_n=pd.concat(prices_ancla).reset_index(drop=True)
     if len(otidx_n)!=0:
         symbolquotes=[]
         wanted_time=[]
@@ -215,9 +214,51 @@ def disp_effect(data,rates):
             symbolquotes.append(float(rates[(rates['time']==wanted_time[i])&(rates['Symbol']==symbols[i])]['close'].values))
         for symbol in symbols:
             pip.append(f_pip_size(symbol))
-        symbolprofit=(otidx_n['Price'].values-symbolquotes)*pip*vol
+        symbolprofit=pd.DataFrame({'Price in time ancla':symbolquotes,
+                 'Time Closes ancla':wanted_time,
+                 'Symbols':otidx_n['Symbol'],
+                 'Symbol_profit':(otidx_n['Price'].values-symbolquotes)*pip*vol})
         disp_effect=[]
         for i in range(len(symbolprofit)):
-            if symbolprofit[i]<0:
-                disp_effect.append(symbolprofit[i])
-    return disp_effect
+            if symbolprofit.loc[i,'Symbol_profit']<0:
+                disp_effect.append(symbolprofit.loc[[i]])
+        de=pd.concat(disp_effect).reset_index(drop=True)
+        ratio_1,ratio_2=[],[]
+        for i in range(len(de)):
+            ratio_1.append(pd.DataFrame(data.where(pd.to_datetime(data['Time.1'])<pd.to_datetime(de.loc[i,'Time Closes ancla'])).dropna().max()).T)
+            ratio_2.append(pd.DataFrame((data.where(pd.to_datetime(data['Time.1'])>pd.to_datetime(prices_ancla_n.loc[i,'Time.1']))).dropna().min()).T)
+        ratio1=pd.concat(ratio_1)['profit_acm']
+        ratio_cp_profit_acm=(de['Symbol_profit']/ratio1.values)*100
+        ratio2=pd.concat(ratio_2)['profit_acm']
+        ratio_cg_profit_acm=(de['Symbol_profit']/ratio2.values)*100
+        idx=symbolprofit[symbolprofit['Symbol_profit']<0].index
+    ratio_3=[]
+    for i in idx:
+        ratio_3.append(symbolprofit.loc[[i]]['Symbol_profit'] / prices_ancla_n.loc[[i]]['Profit'])
+    ratio_cp_cg=pd.concat(ratio_3)
+    ocurrencias=len(de)
+    timesS,timesA=0,0
+    for i in range(len(ratio_cg_profit_acm)):
+        if ratio_cp_profit_acm[i]<ratio_cg_profit_acm[i]:
+            timesS+=1
+        if list(ratio_cp_cg)[i]>ratio_cg_profit_acm[i]:
+            timesA+=1
+    aversion=(timesA/len(ratio_cg_profit_acm))*100
+    statusq=(timesS/len(ratio_cg_profit_acm))*100
+
+    sensd=0
+    if ancla.loc[0,'profit_acm']>ancla.iloc[-1,16]:
+        sensd+=1
+    if ancla.loc[0,'profit_acm']<ancla.iloc[-1,16] and de.loc[0,'Symbol_profit']<de.iloc[-1,3]:
+        sensd+=1
+    if list(ratio_cp_cg)[-1]>2:
+        sensd+=1
+    if sensd>=2:
+        sensibilidad_dec=1
+    else:
+        sensibilidad_dec=0  
+        
+    final_df=pd.DataFrame(columns=['Ocurrencias','Status_quo','Aversión_pérdida','Sensibilidad_Decreciente'])
+    final_df.loc[0] = [ocurrencias,statusq,aversion,sensibilidad_dec]
+    diccionario={'df':final_df}
+    return diccionario[dic]
