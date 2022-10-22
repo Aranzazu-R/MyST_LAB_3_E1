@@ -48,3 +48,8 @@ rates_a=pd.read_csv('rates_a.csv')
 
 data_pips0 = pd.read_csv("files/instruments_pips.csv")
 data_pips = data_pips0.set_index("Instrument")
+
+#data_disp_f=fn.f_be_de(mtf,rates_f,'df')
+#data_disp_m=fn.f_be_de(mtm,rates_m,'df')
+#data_disp_f=fn.f_be_de(mtp,rates_p,'df')
+#data_disp_a=fn.f_be_de(mta,rates_a,'df')

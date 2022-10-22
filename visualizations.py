@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
 import functions as fn
 import plotly.graph_objects as go
+import plotly.express as px
 import matplotlib.pyplot as plt
 
 
@@ -43,3 +45,9 @@ def graph_tab(data:'datos a graficar en gráfica de tablas', ejex:'nombre de el 
     plt.ylabel(ejey)
     plt.title(titulo)
     return plt.show()
+
+def grafica_3(data_disp):
+    data_disp = pd.DataFrame({'efecto':['status_quo', 'aversion_perdida', 'sensibilidad_decreciente'],'ocurrencias':[data_disp.iloc[0,0],0,0]})
+    fig = px.bar(data_disp, x='efecto', y='ocurrencias')
+    fig.update_layout(title = 'Disposition Effect',yaxis_title='Disposition',xaxis_title='Effect')
+    return fig.show()
