@@ -4,6 +4,8 @@ import functions as fn
 import plotly.graph_objects as go
 import plotly.express as px
 import matplotlib.pyplot as plt
+import plotly.express as px
+import pandas as pd
 
 
 def grafica_1(data):
@@ -12,8 +14,6 @@ def grafica_1(data):
     lista[data['rank %'].idxmax()]=0.2
     fig = go.Figure(data=[go.Pie(labels=data['Symbol'], values=data['rank %'], pull=lista)])
     return fig.show()
-
-
 
 def grafica_2(data):
     data_profit=fn.f_evolucion_capital(data)
