@@ -45,7 +45,7 @@ def graph_tab(data:'datos a graficar en gráfica de tablas', ejex:'nombre de el 
     return plt.show()
 
 def grafica_3(data_disp):
-    data_disp = pd.DataFrame({'efecto':['status_quo', 'aversion_perdida', 'sensibilidad_decreciente'],'ocurrencias':[data_disp.iloc[0,0],0,0]})
-    fig = px.bar(data_disp, x='efecto', y='ocurrencias')
+    data_disp = pd.DataFrame({'Rango':['status_quo', 'aversion_perdida', 'sensibilidad_decreciente'],'Status Quo':[data_disp.iloc[0,1],data_disp.iloc[0,2],data_disp.iloc[0,3]]})
+    fig = px.bar(data_disp, x='Rango', y='Status Quo')
     fig.update_layout(title = 'Disposition Effect',yaxis_title='Disposition',xaxis_title='Effect')
     return fig.show()
