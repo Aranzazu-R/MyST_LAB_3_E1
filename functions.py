@@ -247,9 +247,9 @@ def f_be_de(data,rates,dic):
     statusq=(timesS/len(ratio_cg_profit_acm))*100
 
     sensd=0
-    if ancla.loc[0,'profit_acm']>ancla.iloc[-1,16]:
+    if ancla.loc[0,'profit_acm']>ancla.iloc[-1,15]:
         sensd+=1
-    if ancla.loc[0,'profit_acm']<ancla.iloc[-1,16] and de.loc[0,'Symbol_profit']<de.iloc[-1,3]:
+    if ancla.loc[0,'profit_acm']<ancla.iloc[-1,15] and de.loc[0,'Symbol_profit']<de.iloc[-1,3]:
         sensd+=1
     if list(ratio_cp_cg)[-1]>2:
         sensd+=1
@@ -261,4 +261,8 @@ def f_be_de(data,rates,dic):
     final_df=pd.DataFrame(columns=['Ocurrencias','Status_quo','Aversión_pérdida','Sensibilidad_Decreciente'])
     final_df.loc[0] = [ocurrencias,statusq,aversion,sensibilidad_dec]
     diccionario={'df':final_df}
-    return diccionario[dic]
+    return diccionario[dic],ancla, symbolprofit
+
+def data_disp(mt,rates,df):
+    data_disp=f_be_de(mt,rates,df)
+    return data_disp
