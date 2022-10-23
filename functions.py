@@ -7,10 +7,6 @@
 # -- repository: https://github.com/FridaHernandezL/MyST_LAB_3_E1                                    -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
-
-# Install all the pip packages in the requirements.txt
-import sys
-#!{sys.executable} -m pip install -r requirements.txt
 import pandas as pd
 import numpy as np
 import statistics as st
@@ -191,7 +187,7 @@ def rates(data):
     # display data
     return rates
 '''
-'''
+
 def f_be_de(data,rates,dic):
     ancla=data[data['Profit']>0].reset_index(drop=True)
     otidx=[]
@@ -265,93 +261,8 @@ def f_be_de(data,rates,dic):
     final_df=pd.DataFrame(columns=['Ocurrencias','Status_quo','Aversión_pérdida','Sensibilidad_Decreciente'])
     final_df.loc[0] = [ocurrencias,statusq,aversion,sensibilidad_dec]
     diccionario={'df':final_df}
-<<<<<<< HEAD
-    return diccionario[dic]
-
-'''
-def f_be_de(data,rates,dic):
-    ancla=data[data['Profit']>0].reset_index(drop=True)
-    otidx=[]
-    prices_ancla=[]
-    for i in range(len(ancla)):
-        n_ancla=ancla.loc[[i]]
-        for j in range(len(data)):
-            limit_inf=pd.to_datetime(data.iloc[[j]]['Time'])
-            limit_sup=pd.to_datetime(data.iloc[[j]]['Time.1'])
-            closetime_ancla=pd.to_datetime(n_ancla['Time.1'])
-            if closetime_ancla.values<limit_sup.values and closetime_ancla.values>limit_inf.values:
-                otidx.append(data.iloc[[j]])
-                prices_ancla.append(n_ancla.loc[[i]])
-    otidx_n=pd.concat(otidx).reset_index(drop=True)
-    prices_ancla_n=pd.concat(prices_ancla).reset_index(drop=True)
-    if len(otidx_n)!=0:
-        symbolquotes=[]
-        wanted_time=[]
-        symbols=otidx_n['Symbol'].values
-        vol=otidx_n['Volume'].values
-        pip=[]
-        for i in range(len(prices_ancla_n)):
-            wanted_time.append(rates['time'].where(pd.to_datetime(rates['time']) > pd.to_datetime(prices_ancla_n.loc[i,'Time.1'])).dropna().min())
-            symbolquotes.append(float(rates[(rates['time']==wanted_time[i])&(rates['Symbol']==symbols[i])]['close'].values))
-        for symbol in symbols:
-            pip.append(f_pip_size(symbol))
-        symbolprofit=pd.DataFrame({'Price in time ancla':symbolquotes,
-                 'Time Closes ancla':wanted_time,
-                 'Symbols':otidx_n['Symbol'],
-                 'Symbol_profit':(otidx_n['Price'].values-symbolquotes)*pip*vol})
-        disp_effect=[]
-        for i in range(len(symbolprofit)):
-            if symbolprofit.loc[i,'Symbol_profit']<0:
-                disp_effect.append(symbolprofit.loc[[i]])
-        de=pd.concat(disp_effect).reset_index(drop=True)
-        ratio_1,ratio_2=[],[]
-        for i in range(len(de)):
-            ratio_1.append(pd.DataFrame(data.where(pd.to_datetime(data['Time.1'])<pd.to_datetime(de.loc[i,'Time Closes ancla'])).dropna().max()).T)
-            ratio_2.append(pd.DataFrame((data.where(pd.to_datetime(data['Time.1'])>pd.to_datetime(prices_ancla_n.loc[i,'Time.1']))).dropna().min()).T)
-        ratio1=pd.concat(ratio_1)['profit_acm']
-        ratio_cp_profit_acm=(de['Symbol_profit']/ratio1.values)*100
-        ratio2=pd.concat(ratio_2)['profit_acm']
-        ratio_cg_profit_acm=(de['Symbol_profit']/ratio2.values)*100
-        idx=symbolprofit[symbolprofit['Symbol_profit']<0].index
-    ratio_3=[]
-    for i in idx:
-        ratio_3.append(symbolprofit.loc[[i]]['Symbol_profit'] / prices_ancla_n.loc[[i]]['Profit'])
-    ratio_cp_cg=pd.concat(ratio_3)
-    ocurrencias=len(de)
-    timesS,timesA=0,0
-    for i in range(len(ratio_cg_profit_acm)):
-        if ratio_cp_profit_acm[i]<ratio_cg_profit_acm[i]:
-            timesS+=1
-        if list(ratio_cp_cg)[i]>ratio_cg_profit_acm[i]:
-            timesA+=1
-    aversion=(timesA/len(ratio_cg_profit_acm))*100
-    statusq=(timesS/len(ratio_cg_profit_acm))*100
-
-    sensd=0
-    if ancla.loc[0,'profit_acm']>ancla.iloc[-1,15]:
-        sensd+=1
-    if ancla.loc[0,'profit_acm']<ancla.iloc[-1,15] and de.loc[0,'Symbol_profit']<de.iloc[-1,3]:
-        sensd+=1
-    if list(ratio_cp_cg)[-1]>2:
-        sensd+=1
-    if sensd>=2:
-        sensibilidad_dec=1
-    else:
-        sensibilidad_dec=0  
-        
-    final_df=pd.DataFrame(columns=['Ocurrencias','Status_quo','Aversión_pérdida','Sensibilidad_Decreciente'])
-    final_df.loc[0] = [ocurrencias,statusq,aversion,sensibilidad_dec]
-    diccionario={'df':final_df}
-    return diccionario[dic]
-
-def data_disp(mt,rates,df):
-    data_disp=f_be_de(mt,rates,df)
-    return data_disp
-    
-=======
     return diccionario[dic],ancla, symbolprofit
 
 def data_disp(mt,rates,df):
     data_disp=f_be_de(mt,rates,df)
     return data_disp
->>>>>>> main
