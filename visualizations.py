@@ -2,6 +2,8 @@ import numpy as np
 import functions as fn
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+import plotly.express as px
+import pandas as pd
 
 
 def grafica_1(data):
@@ -10,8 +12,6 @@ def grafica_1(data):
     lista[data['rank %'].idxmax()]=0.2
     fig = go.Figure(data=[go.Pie(labels=data['Symbol'], values=data['rank %'], pull=lista)])
     return fig.show()
-
-
 
 def grafica_2(data):
     data_profit=fn.f_evolucion_capital(data)
@@ -43,3 +43,9 @@ def graph_tab(data:'datos a graficar en gráfica de tablas', ejex:'nombre de el 
     plt.ylabel(ejey)
     plt.title(titulo)
     return plt.show()
+
+def grafica_3(data_disp):
+    data_disp = pd.DataFrame({'efecto':['status_quo', 'aversion_perdida', 'sensibilidad_decreciente'],'ocurrencias':[data_disp.iloc[0,0],0,0]})
+    fig = px.bar(data_disp, x='efecto', y='ocurrencias')
+    fig.update_layout(title = 'Disposition Effect',yaxis_title='Disposition',xaxis_title='Effect')
+    return fig.show()
