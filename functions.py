@@ -261,7 +261,7 @@ def f_be_de(data,rates,dic):
     final_df=pd.DataFrame(columns=['Ocurrencias','Status_quo','Aversión_pérdida','Sensibilidad_Decreciente'])
     final_df.loc[0] = [ocurrencias,statusq,aversion,sensibilidad_dec]
     diccionario={'df':final_df}
-    return diccionario[dic],ancla, symbolprofit
+    return diccionario[dic],ancla, symbolprofit,de
 
 def data_disp(mt,rates,df):
     data_disp=f_be_de(mt,rates,df)
